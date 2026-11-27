@@ -43,7 +43,7 @@ struct GenreTile: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(genre.name)
-                    .font(.ui(19, .bold))
+                    .font(.display(19, .bold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
                 Text("\(Formatters.count(genre.albums.count, "album")) · \(Formatters.count(genre.trackCount, "track"))")
@@ -78,8 +78,10 @@ struct GenreDetailView: View {
                             .tracking(1.6)
                             .foregroundStyle(Theme.secondaryText)
                         Text(genre.name)
-                            .font(.ui(46, .heavy))
+                            .font(.display(Theme.heroTitleSize, .heavy))
                             .foregroundStyle(Theme.primaryText)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.5)
                         Text("\(Formatters.count(genre.albums.count, "album")) · \(Formatters.count(tracks.count, "track")) · \(Formatters.longDuration(tracks.reduce(0) { $0 + $1.duration }))")
                             .font(.ui(13))
                             .foregroundStyle(Theme.secondaryText)
@@ -107,8 +109,8 @@ struct GenreDetailView: View {
                         .padding(.top, 12)
                     }
                     .padding(.horizontal, Theme.pagePadding)
-                    .padding(.top, 36)
-                    .padding(.bottom, 32)
+                    .padding(.top, 28)
+                    .padding(.bottom, 34)
                     .background(alignment: .top) {
                         LinearGradient(colors: [Theme.tileColor(seed: genre.name).opacity(0.45), Theme.background], startPoint: .top, endPoint: .bottom)
                             .frame(height: 320)

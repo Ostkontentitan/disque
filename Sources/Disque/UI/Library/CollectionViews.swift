@@ -100,15 +100,16 @@ struct HistoryView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {
+                        TrackListHeader(layout: .list, detailTitle: "PLAYED")
                         ForEach(Array(entries.enumerated()), id: \.element.0.id) { offset, item in
-                            HStack(spacing: 0) {
-                                TrackRow(track: item.1, number: offset + 1, layout: .list, context: tracks) {
-                                    player.play(tracks, startAt: offset, source: "Recently Played")
-                                }
-                                Text(Formatters.relativeDate(item.0.date))
-                                    .font(.ui(12))
-                                    .foregroundStyle(Theme.tertiaryText)
-                                    .frame(width: 110, alignment: .trailing)
+                            TrackRow(
+                                track: item.1,
+                                number: offset + 1,
+                                layout: .list,
+                                context: tracks,
+                                detail: Formatters.relativeDate(item.0.date)
+                            ) {
+                                player.play(tracks, startAt: offset, source: "Recently Played")
                             }
                         }
                     }
@@ -139,7 +140,7 @@ struct PlaylistView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(alignment: .bottom, spacing: 36) {
                         MosaicArtwork(requests: covers, cornerRadius: 8, seed: playlist.name)
-                            .frame(width: 236, height: 236)
+                            .frame(width: Theme.heroArtworkSize, height: Theme.heroArtworkSize)
                             .shadow(color: .black.opacity(0.5), radius: 24, y: 12)
                         VStack(alignment: .leading, spacing: 10) {
                             Text("PLAYLIST")
@@ -147,7 +148,7 @@ struct PlaylistView: View {
                                 .tracking(1.6)
                                 .foregroundStyle(Theme.secondaryText)
                             Text(playlist.name)
-                                .font(.ui(40, .heavy))
+                                .font(.display(Theme.heroTitleSize, .heavy))
                                 .foregroundStyle(Theme.primaryText)
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.5)

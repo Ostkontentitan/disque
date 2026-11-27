@@ -15,6 +15,10 @@ enum Theme {
     static let accent = Color(red: 0.24, green: 0.55, blue: 1.0)
 
     static let pagePadding: CGFloat = 36
+    /// Left/right inset of sidebar and player bar content.
+    static let chromePadding: CGFloat = 24
+    static let heroTitleSize: CGFloat = 42
+    static let heroArtworkSize: CGFloat = 256
 
     static func placeholderGradient(seed: String) -> LinearGradient {
         let hue = Double(seed.stableHash % 360) / 360
@@ -34,8 +38,67 @@ enum Theme {
     }
 }
 
+/// Font pairings the app can be set in (Settings → Appearance). `display` is used for page and
+/// section titles, `text` for everything else; SF Symbols always stay in the system font.
+enum Typeface: String, CaseIterable, Identifiable {
+    case system, rounded, editorial, avenir, futura
+
+    static let storageKey = "appearance.typeface"
+
+    /// Read straight from defaults so every view sees the same value during a re-render.
+    static var current: Typeface {
+        UserDefaults.standard.string(forKey: storageKey).flatMap(Typeface.init(rawValue:)) ?? .system
+    }
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: "SF Pro"
+        case .rounded: "SF Pro Rounded"
+        case .editorial: "New York + SF Pro"
+        case .avenir: "Avenir Next"
+        case .futura: "Futura + SF Pro"
+        }
+    }
+
+    var summary: String {
+        switch self {
+        case .system: "Neutral and native. The macOS default."
+        case .rounded: "Softer and friendlier; matches the wordmark."
+        case .editorial: "Serif titles over a sans interface, like a liner-notes booklet."
+        case .avenir: "Geometric and warm, a classic music-app look."
+        case .futura: "Mid-century jazz-sleeve titles over a sans interface."
+        }
+    }
+
+    func text(_ size: CGFloat, _ weight: Font.Weight) -> Font {
+        switch self {
+        case .system, .editorial, .futura: .system(size: size, weight: weight)
+        case .rounded: .system(size: size, weight: weight, design: .rounded)
+        case .avenir: .custom("Avenir Next", fixedSize: size).weight(weight)
+        }
+    }
+
+    func display(_ size: CGFloat, _ weight: Font.Weight) -> Font {
+        switch self {
+        case .system, .rounded: text(size, weight)
+        // Avenir Next Heavy is too blocky at title sizes; Bold carries the same emphasis.
+        case .avenir: text(size, weight == .heavy || weight == .black ? .bold : weight)
+        case .editorial: .system(size: size, weight: weight, design: .serif)
+        case .futura: .custom("Futura", fixedSize: size).weight(weight)
+        }
+    }
+}
+
 extension Font {
+    /// Interface text: labels, rows, metadata.
     static func ui(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
-        .system(size: size, weight: weight)
+        Typeface.current.text(size, weight)
+    }
+
+    /// Page, hero and section titles.
+    static func display(_ size: CGFloat, _ weight: Font.Weight = .bold) -> Font {
+        Typeface.current.display(size, weight)
     }
 }

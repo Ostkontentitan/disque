@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(LibraryStore.self) private var library
+    @AppStorage(Typeface.storageKey) private var typeface: Typeface = .system
 
     var body: some View {
         Form {
@@ -71,9 +72,31 @@ struct SettingsView: View {
                     }
                 }
             }
+
+            Section("Font") {
+                ForEach(Typeface.allCases) { face in
+                    Button {
+                        typeface = face
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: typeface == face ? "checkmark.circle.fill" : "circle")
+                                .font(.system(size: 15))
+                                .foregroundStyle(typeface == face ? Theme.accent : .secondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(face.title).font(face.display(15, .semibold))
+                                Text(face.summary).font(face.text(11.5, .regular)).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(typeface == face ? .isSelected : [])
+                }
+            }
         }
         .formStyle(.grouped)
-        .frame(width: 560, height: 520)
+        .frame(width: 560, height: 680)
         .preferredColorScheme(.dark)
     }
 }

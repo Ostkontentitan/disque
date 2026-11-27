@@ -6,6 +6,7 @@ struct RootView: View {
     @Environment(Player.self) private var player
     @Environment(Router.self) private var router
     @State private var isDropTargeted = false
+    @AppStorage(Typeface.storageKey) private var typeface: Typeface = .system
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,6 +32,8 @@ struct RootView: View {
             }
             PlayerBar()
         }
+        // Fonts are resolved when views are built, so rebuild the window contents on a typeface change.
+        .id(typeface)
         .ignoresSafeArea()
         .background(Theme.background)
         .preferredColorScheme(.dark)
@@ -88,6 +91,10 @@ struct ContentArea: View {
     var body: some View {
         ZStack {
             root
+                // When a sidebar click also pops a detail page, swap the section instantly so only
+                // the detail page fades out (instead of three pages cross-fading at once).
+                .id(RootKey(sidebar: router.sidebar, isSearching: router.isSearching))
+                .transition(.identity)
                 .opacity(router.stack.isEmpty ? 1 : 0)
                 .allowsHitTesting(router.stack.isEmpty)
                 .accessibilityHidden(!router.stack.isEmpty)
@@ -100,6 +107,11 @@ struct ContentArea: View {
             }
         }
         .animation(.easeOut(duration: 0.15), value: router.currentRoute)
+    }
+
+    private struct RootKey: Hashable {
+        let sidebar: SidebarItem
+        let isSearching: Bool
     }
 
     @ViewBuilder
@@ -140,7 +152,7 @@ struct WelcomeView: View {
                 .shadow(color: Theme.accent.opacity(0.35), radius: 40)
                 .padding(.bottom, 8)
             Text("Your music, beautifully organised")
-                .font(.ui(30, .heavy))
+                .font(.display(30, .heavy))
                 .foregroundStyle(Theme.primaryText)
             Text("Add the folders where you keep your MP3s. Disque reads their tags and artwork, groups them into albums and artists, and keeps everything in sync as files change.")
                 .font(.ui(14))

@@ -9,7 +9,7 @@ struct QueuePanel: View {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Queue")
-                        .font(.ui(22, .bold))
+                        .font(.display(22, .bold))
                         .foregroundStyle(Theme.primaryText)
                     if let source = player.sourceName {
                         Text("Playing from \(source)")
@@ -41,32 +41,31 @@ struct QueuePanel: View {
                     message: "Play an album or right-click a track and choose “Add to Queue”."
                 )
             } else {
+                // Section labels are plain rows: macOS draws pinned List section headers on an opaque band.
                 List {
                     if let entry = player.currentEntry {
-                        Section {
-                            QueueRow(entry: entry, isCurrent: true)
-                                .queueRowStyle()
-                        } header: {
-                            QueueSectionHeader(title: "Now Playing")
-                        }
+                        QueueSectionHeader(title: "Now Playing")
+                            .queueRowStyle()
+                        QueueRow(entry: entry, isCurrent: true)
+                            .queueRowStyle()
                     }
-                    Section {
-                        if player.upcoming.isEmpty {
-                            Text(player.repeatMode == .off ? "Nothing up next." : "The queue repeats from the start.")
-                                .font(.ui(12.5))
-                                .foregroundStyle(Theme.tertiaryText)
-                                .padding(.vertical, 8)
-                                .queueRowStyle()
-                        }
-                        ForEach(player.upcoming) { entry in
-                            QueueRow(entry: entry, isCurrent: false)
-                                .queueRowStyle()
-                        }
-                        .onMove { source, destination in
-                            player.moveUpcoming(from: source, to: destination)
-                        }
-                    } header: {
-                        QueueSectionHeader(title: "Next Up", detail: upcomingSummary)
+                    QueueSectionHeader(title: "Next Up", detail: upcomingSummary)
+                        .padding(.top, player.currentEntry == nil ? 0 : 8)
+                        .queueRowStyle()
+                    if player.upcoming.isEmpty {
+                        Text(player.repeatMode == .off ? "Nothing up next." : "The queue repeats from the start.")
+                            .font(.ui(12.5))
+                            .foregroundStyle(Theme.tertiaryText)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 8)
+                            .queueRowStyle()
+                    }
+                    ForEach(player.upcoming) { entry in
+                        QueueRow(entry: entry, isCurrent: false)
+                            .queueRowStyle()
+                    }
+                    .onMove { source, destination in
+                        player.moveUpcoming(from: source, to: destination)
                     }
                 }
                 .listStyle(.plain)
@@ -178,7 +177,8 @@ private struct QueueRow: View {
 private extension View {
     func queueRowStyle() -> some View {
         self
-            .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10))
+            // The macOS List adds ~8pt of its own, so rows land on the header's 20pt edges.
+            .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
     }

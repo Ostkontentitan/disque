@@ -25,7 +25,7 @@ struct TopBar: View {
                 router.showQueue.toggle()
             }
         }
-        .padding(.horizontal, Theme.pagePadding - 8)
+        .padding(.horizontal, Theme.pagePadding)
         .padding(.top, 8)
         .frame(height: 68)
         .background { WindowDragArea() }

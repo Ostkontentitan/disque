@@ -15,6 +15,8 @@ struct TrackRow: View {
     var layout: TrackRowLayout = .list
     var context: [Track] = []
     var onRemoveFromPlaylist: (() -> Void)?
+    /// Optional extra column after the album (e.g. when the track was played).
+    var detail: String?
     let onPlay: () -> Void
 
     @Environment(LibraryStore.self) private var library
@@ -46,6 +48,13 @@ struct TrackRow: View {
             if layout == .table || layout == .list {
                 albumLink
                     .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if let detail {
+                Text(detail)
+                    .font(.ui(12.5))
+                    .foregroundStyle(Theme.tertiaryText)
+                    .lineLimit(1)
+                    .frame(width: TrackListHeader.detailWidth, alignment: .leading)
             }
 
             FavoriteButton(isFavorite: isFavorite, size: 13) { library.toggleFavorite(track) }
@@ -141,6 +150,10 @@ struct TrackListHeader: View {
     var layout: TrackRowLayout = .list
     var sortKey: Binding<TrackSortKey>?
     var ascending: Binding<Bool>?
+    /// Title of the optional `TrackRow.detail` column.
+    var detailTitle: String?
+
+    static let detailWidth: CGFloat = 120
 
     private var showsArtwork: Bool { if case .album = layout { return false } else { return true } }
 
@@ -154,6 +167,9 @@ struct TrackListHeader: View {
             }
             if layout == .table || layout == .list {
                 column("ALBUM", .album).frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if let detailTitle {
+                Text(detailTitle).frame(width: Self.detailWidth, alignment: .leading)
             }
             Color.clear.frame(width: 22, height: 1)
             column(nil, .duration).frame(width: 48, alignment: .trailing)

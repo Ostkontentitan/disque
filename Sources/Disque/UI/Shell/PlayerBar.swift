@@ -15,7 +15,7 @@ struct PlayerBar: View {
             PlayerBarTrailing()
                 .frame(width: 330, alignment: .trailing)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Theme.chromePadding)
         .frame(height: 90)
         .background(Theme.playerBar)
         .overlay(alignment: .top) {

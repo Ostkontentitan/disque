@@ -36,7 +36,7 @@ private struct AlbumHeader: View {
         let isCurrent = album.tracks.contains { $0.id == player.currentTrackID }
         HStack(alignment: .bottom, spacing: 36) {
             ArtworkView(request: album.artwork, pixelSize: 720, cornerRadius: 8)
-                .frame(width: 256, height: 256)
+                .frame(width: Theme.heroArtworkSize, height: Theme.heroArtworkSize)
                 .shadow(color: .black.opacity(0.55), radius: 28, y: 14)
 
             VStack(alignment: .leading, spacing: 10) {
@@ -45,7 +45,7 @@ private struct AlbumHeader: View {
                     .tracking(1.6)
                     .foregroundStyle(Theme.secondaryText)
                 Text(album.title)
-                    .font(.ui(40, .heavy))
+                    .font(.display(Theme.heroTitleSize, .heavy))
                     .foregroundStyle(Theme.primaryText)
                     .lineLimit(2)
                     .minimumScaleFactor(0.5)

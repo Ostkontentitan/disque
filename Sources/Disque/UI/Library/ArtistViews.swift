@@ -112,7 +112,7 @@ struct ArtistDetailView: View {
     private func header(_ artist: Artist) -> some View {
         HStack(alignment: .center, spacing: 36) {
             ArtworkView(request: artist.artwork, pixelSize: 600, circular: true, placeholderText: artist.albums.isEmpty ? artist.name : nil)
-                .frame(width: 220, height: 220)
+                .frame(width: 240, height: 240)
                 .shadow(color: .black.opacity(0.5), radius: 24, y: 12)
 
             VStack(alignment: .leading, spacing: 10) {
@@ -121,7 +121,7 @@ struct ArtistDetailView: View {
                     .tracking(1.6)
                     .foregroundStyle(Theme.secondaryText)
                 Text(artist.name)
-                    .font(.ui(46, .heavy))
+                    .font(.display(Theme.heroTitleSize, .heavy))
                     .foregroundStyle(Theme.primaryText)
                     .lineLimit(2)
                     .minimumScaleFactor(0.5)
@@ -150,7 +150,7 @@ struct ArtistDetailView: View {
                     }
                     MoreMenuButton { ArtistMenuItems(artist: artist) }
                 }
-                .padding(.top, 10)
+                .padding(.top, 12)
             }
             Spacer(minLength: 0)
         }

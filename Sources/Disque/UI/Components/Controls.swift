@@ -204,7 +204,7 @@ struct SectionTitle: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text(title)
-                .font(.ui(20, .bold))
+                .font(.display(20, .bold))
                 .foregroundStyle(Theme.primaryText)
             if let subtitle {
                 Text(subtitle)
@@ -233,7 +233,7 @@ struct PageHeader<Trailing: View>: View {
         HStack(alignment: .bottom, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(.ui(34, .bold))
+                    .font(.display(34, .bold))
                     .foregroundStyle(Theme.primaryText)
                     .lineLimit(1)
                 if let subtitle {
@@ -274,10 +274,12 @@ struct TabStrip<Tab: Hashable & Identifiable>: View {
                     isSelected: tab == selection,
                     namespace: namespace
                 ) {
-                    withAnimation(.snappy(duration: 0.25)) { selection = tab }
+                    selection = tab
                 }
             }
         }
+        // Animate only the underline; the tab content swaps instantly instead of cross-fading two pages.
+        .animation(.snappy(duration: 0.25), value: selection)
     }
 }
 
@@ -382,7 +384,7 @@ struct EmptyStateView: View {
                 .foregroundStyle(Theme.tertiaryText)
                 .padding(.bottom, 4)
             Text(title)
-                .font(.ui(20, .bold))
+                .font(.display(20, .bold))
                 .foregroundStyle(Theme.primaryText)
             Text(message)
                 .font(.ui(13))

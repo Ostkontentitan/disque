@@ -108,9 +108,6 @@ private struct LibraryStatusFooter: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Rectangle().fill(Theme.separator).frame(height: 1)
-                .padding(.horizontal, -16)
-                .padding(.bottom, 4)
             if library.isScanning {
                 VStack(alignment: .leading, spacing: 6) {
                     if library.scanTotal > 0 {
@@ -151,13 +148,17 @@ private struct LibraryStatusFooter: View {
                 .help("Settings")
             }
         }
-        .padding(16)
+        .padding(.horizontal, Theme.chromePadding)
+        .padding(.vertical, 14)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Theme.separator).frame(height: 1)
+        }
     }
 }
 
 struct Wordmark: View {
     var body: some View {
-        HStack(spacing: 9) {
+        HStack(spacing: 10) {
             VinylMark(size: 24)
             Text("disque")
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
