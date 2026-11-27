@@ -97,6 +97,5 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(width: 560, height: 680)
-        .preferredColorScheme(.dark)
     }
 }

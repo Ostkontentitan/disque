@@ -25,7 +25,7 @@ struct ArtistCard: View {
     var body: some View {
         VStack(spacing: 12) {
             ArtworkView(request: artist.artwork, pixelSize: 400, circular: true, placeholderText: artist.albums.isEmpty ? artist.name : nil)
-                .shadow(color: .black.opacity(hovering ? 0.45 : 0.25), radius: hovering ? 14 : 6, y: hovering ? 8 : 3)
+                .shadow(color: Theme.shadow(hovering ? 0.45 : 0.25), radius: hovering ? 14 : 6, y: hovering ? 8 : 3)
                 .overlay(alignment: .bottomTrailing) {
                     if hovering {
                         PlayCircleButton(size: 42) {
@@ -113,7 +113,7 @@ struct ArtistDetailView: View {
         HStack(alignment: .center, spacing: 36) {
             ArtworkView(request: artist.artwork, pixelSize: 600, circular: true, placeholderText: artist.albums.isEmpty ? artist.name : nil)
                 .frame(width: 240, height: 240)
-                .shadow(color: .black.opacity(0.5), radius: 24, y: 12)
+                .shadow(color: Theme.shadow(0.5), radius: 24, y: 12)
 
             VStack(alignment: .leading, spacing: 10) {
                 Text("ARTIST")

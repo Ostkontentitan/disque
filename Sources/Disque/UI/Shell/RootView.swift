@@ -36,7 +36,6 @@ struct RootView: View {
         .id(typeface)
         .ignoresSafeArea()
         .background(Theme.background)
-        .preferredColorScheme(.dark)
         .tint(Theme.accent)
         .frame(minWidth: 1100, minHeight: 700)
         .animation(.snappy(duration: 0.28), value: router.showQueue)

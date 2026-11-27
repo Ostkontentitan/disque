@@ -142,7 +142,7 @@ private struct LibraryStatusFooter: View {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Theme.primaryText)
                         .frame(width: 30, height: 30)
-                        .background(Circle().fill(Color.white.opacity(0.08)))
+                        .background(Circle().fill(Theme.control))
                 }
                 .buttonStyle(PressableStyle())
                 .help("Settings")
@@ -174,10 +174,10 @@ struct VinylMark: View {
 
     var body: some View {
         ZStack {
-            Circle().fill(Color(white: 0.96))
+            Circle().fill(Theme.vinylDisc)
             ForEach(1..<4, id: \.self) { ring in
                 Circle()
-                    .stroke(Color.black.opacity(0.1), lineWidth: max(0.5, size * 0.012))
+                    .stroke(Theme.vinylGroove, lineWidth: max(0.5, size * 0.012))
                     .padding(size * (0.06 + CGFloat(ring) * 0.055))
             }
             Circle().fill(Theme.accent).padding(size * 0.3)

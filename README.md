@@ -1,6 +1,6 @@
 # Disque
 
-A native macOS player for your local MP3 library, with a dark, album-first interface in the spirit of the Qobuz desktop library.
+A native macOS player for your local MP3 library, with an album-first interface in the spirit of the Qobuz desktop library. Light and dark mode follow the system appearance.
 
 ## Features
 

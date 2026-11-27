@@ -35,7 +35,7 @@ private struct NowPlayingSummary: View {
             HStack(spacing: 14) {
                 ArtworkView(request: library.index.artwork(for: track), pixelSize: 160, cornerRadius: 4)
                     .frame(width: 58, height: 58)
-                    .shadow(color: .black.opacity(0.4), radius: 6, y: 2)
+                    .shadow(color: Theme.shadow(0.4), radius: 6, y: 2)
                     .onTapGesture { if let album { router.showAlbum(album.id) } }
                     .help("Go to Album")
                 VStack(alignment: .leading, spacing: 4) {
@@ -88,10 +88,10 @@ private struct TransportControls: View {
             } label: {
                 Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 16, weight: .heavy))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Theme.playerBar)
                     .offset(x: player.isPlaying ? 0 : 1.5)
                     .frame(width: 40, height: 40)
-                    .background(Circle().fill(.white))
+                    .background(Circle().fill(Theme.primaryText))
                     .contentShape(Circle())
             }
             .buttonStyle(PressableStyle())
@@ -204,15 +204,15 @@ struct ThinSlider: View {
             let highlighted = (isActive || dragging) && isEnabled
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.white.opacity(0.16))
+                    .fill(Theme.sliderTrack)
                     .frame(height: highlighted ? 5 : 3.5)
                 Capsule()
-                    .fill(highlighted ? Theme.accent : Color.white.opacity(0.85))
+                    .fill(highlighted ? Theme.accent : Theme.sliderFill)
                     .frame(width: width * fraction, height: highlighted ? 5 : 3.5)
                 Circle()
                     .fill(.white)
                     .frame(width: 12, height: 12)
-                    .shadow(color: .black.opacity(0.4), radius: 2)
+                    .shadow(color: Theme.shadow(0.4), radius: 2)
                     .offset(x: width * fraction - 6)
                     .opacity(highlighted ? 1 : 0)
             }

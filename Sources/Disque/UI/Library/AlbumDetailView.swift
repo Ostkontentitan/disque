@@ -37,7 +37,7 @@ private struct AlbumHeader: View {
         HStack(alignment: .bottom, spacing: 36) {
             ArtworkView(request: album.artwork, pixelSize: 720, cornerRadius: 8)
                 .frame(width: Theme.heroArtworkSize, height: Theme.heroArtworkSize)
-                .shadow(color: .black.opacity(0.55), radius: 28, y: 14)
+                .shadow(color: Theme.shadow(0.55), radius: 28, y: 14)
 
             VStack(alignment: .leading, spacing: 10) {
                 Text(album.isCompilation ? "COMPILATION" : (album.tracks.count <= 4 ? "EP" : "ALBUM"))

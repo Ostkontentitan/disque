@@ -78,7 +78,7 @@ struct QueuePanel: View {
         .overlay(alignment: .leading) {
             Rectangle().fill(Theme.separator).frame(width: 1)
         }
-        .shadow(color: .black.opacity(0.45), radius: 30, x: -12)
+        .shadow(color: Theme.shadow(0.45), radius: 30, x: -12)
     }
 
     private var upcomingSummary: String? {

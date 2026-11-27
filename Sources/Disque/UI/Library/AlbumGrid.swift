@@ -53,7 +53,7 @@ struct AlbumCard: View {
         let current = isCurrentAlbum
         VStack(alignment: .leading, spacing: 10) {
             ArtworkView(request: album.artwork, pixelSize: 480, cornerRadius: 6)
-                .shadow(color: .black.opacity(hovering ? 0.45 : 0.25), radius: hovering ? 14 : 6, y: hovering ? 8 : 3)
+                .shadow(color: Theme.shadow(hovering ? 0.45 : 0.25), radius: hovering ? 14 : 6, y: hovering ? 8 : 3)
                 .overlay {
                     if hovering {
                         LinearGradient(colors: [.black.opacity(0.0), .black.opacity(0.55)], startPoint: .center, endPoint: .bottom)
@@ -77,6 +77,8 @@ struct AlbumCard: View {
                             MoreMenuButton(size: 34) { AlbumMenuItems(album: album) }
                         }
                         .padding(10)
+                        // Drawn over the darkened cover, so always use the light-on-dark control colors.
+                        .environment(\.colorScheme, .dark)
                         .transition(.opacity)
                     }
                 }

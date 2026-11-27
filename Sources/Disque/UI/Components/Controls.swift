@@ -18,11 +18,11 @@ struct PillButtonStyle: ButtonStyle {
         var body: some View {
             configuration.label
                 .font(.ui(14, .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(prominent ? .white : Theme.primaryText)
                 .padding(.horizontal, 22)
                 .frame(height: 40)
                 .background(
-                    Capsule().fill(prominent ? Theme.accent : Color.white.opacity(hovering ? 0.16 : 0.1))
+                    Capsule().fill(prominent ? Theme.accent : (hovering ? Theme.controlHover : Theme.control))
                 )
                 .overlay(Capsule().fill(Color.white.opacity(prominent && hovering ? 0.1 : 0)))
                 .scaleEffect(configuration.isPressed ? 0.97 : 1)
@@ -86,7 +86,7 @@ struct CircleIconButton: View {
                 .font(.system(size: iconSize, weight: .semibold))
                 .foregroundStyle(isActive ? Theme.accent : (isEnabled ? Theme.primaryText : Theme.tertiaryText))
                 .frame(width: size, height: size)
-                .background(Circle().fill(Color.white.opacity(hovering && isEnabled ? 0.15 : 0.08)))
+                .background(Circle().fill(hovering && isEnabled ? Theme.controlHover : Theme.control))
                 .contentShape(Circle())
         }
         .buttonStyle(PressableStyle())
@@ -190,7 +190,7 @@ struct QualityBadge: View {
         .foregroundStyle(Theme.secondaryText)
         .padding(.horizontal, 8)
         .frame(height: 20)
-        .background(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.white.opacity(0.18), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 4).strokeBorder(Theme.border, lineWidth: 1))
         .lineLimit(1)
         .fixedSize()
     }
@@ -358,7 +358,7 @@ struct MoreMenuButton<Content: View>: View {
                 .font(.system(size: size * 0.36, weight: .bold))
                 .foregroundStyle(hovering || filled ? Theme.primaryText : Theme.secondaryText)
                 .frame(width: size, height: size)
-                .background(Circle().fill(filled ? Color.white.opacity(hovering ? 0.15 : 0.08) : .clear))
+                .background(Circle().fill(filled ? (hovering ? Theme.controlHover : Theme.control) : .clear))
                 .contentShape(Circle())
         }
         .menuStyle(.button)

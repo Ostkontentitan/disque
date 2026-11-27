@@ -141,7 +141,7 @@ struct PlaylistView: View {
                     HStack(alignment: .bottom, spacing: 36) {
                         MosaicArtwork(requests: covers, cornerRadius: 8, seed: playlist.name)
                             .frame(width: Theme.heroArtworkSize, height: Theme.heroArtworkSize)
-                            .shadow(color: .black.opacity(0.5), radius: 24, y: 12)
+                            .shadow(color: Theme.shadow(0.5), radius: 24, y: 12)
                         VStack(alignment: .leading, spacing: 10) {
                             Text("PLAYLIST")
                                 .font(.ui(11, .bold))

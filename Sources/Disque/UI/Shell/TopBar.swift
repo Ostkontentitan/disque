@@ -64,8 +64,8 @@ private struct SearchField: View {
         }
         .padding(.horizontal, 14)
         .frame(height: 36)
-        .background(Capsule().fill(focused ? Color.white.opacity(0.12) : Theme.field))
-        .overlay(Capsule().strokeBorder(focused ? Color.white.opacity(0.25) : .clear, lineWidth: 1))
+        .background(Capsule().fill(focused ? Theme.fieldFocused : Theme.field))
+        .overlay(Capsule().strokeBorder(focused ? Theme.fieldFocusRing : .clear, lineWidth: 1))
         .onChange(of: router.searchFocusToken) { _, _ in focused = true }
         .onChange(of: router.searchText) { _, _ in router.searchTextChanged() }
     }

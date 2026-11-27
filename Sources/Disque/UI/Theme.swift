@@ -1,18 +1,37 @@
 import SwiftUI
 
+/// Colors resolve per appearance: the window follows the system's light/dark setting, and a view
+/// can pin one with `.environment(\.colorScheme, …)` (e.g. controls drawn over artwork).
 enum Theme {
-    static let background = Color(red: 0.071, green: 0.071, blue: 0.078)
-    static let sidebar = Color(red: 0.035, green: 0.035, blue: 0.04)
-    static let elevated = Color(red: 0.105, green: 0.105, blue: 0.115)
-    static let playerBar = Color(red: 0.055, green: 0.055, blue: 0.062)
-    static let hover = Color.white.opacity(0.06)
-    static let selected = Color.white.opacity(0.1)
-    static let separator = Color.white.opacity(0.08)
-    static let field = Color.white.opacity(0.08)
-    static let primaryText = Color.white
-    static let secondaryText = Color.white.opacity(0.62)
-    static let tertiaryText = Color.white.opacity(0.38)
-    static let accent = Color(red: 0.24, green: 0.55, blue: 1.0)
+    static let background = Color.adaptive(light: .rgb(1, 1, 1), dark: .rgb(0.071, 0.071, 0.078))
+    static let sidebar = Color.adaptive(light: .rgb(0.957, 0.957, 0.965), dark: .rgb(0.035, 0.035, 0.04))
+    static let elevated = Color.adaptive(light: .rgb(0.98, 0.98, 0.985), dark: .rgb(0.105, 0.105, 0.115))
+    static let playerBar = Color.adaptive(light: .rgb(0.973, 0.973, 0.978), dark: .rgb(0.055, 0.055, 0.062))
+    static let hover = Color.adaptive(light: .black(0.045), dark: .white(0.06))
+    static let selected = Color.adaptive(light: .black(0.075), dark: .white(0.1))
+    static let separator = Color.adaptive(light: .black(0.09), dark: .white(0.08))
+    static let field = Color.adaptive(light: .black(0.055), dark: .white(0.08))
+    static let fieldFocused = Color.adaptive(light: .black(0.075), dark: .white(0.12))
+    static let fieldFocusRing = Color.adaptive(light: .black(0.2), dark: .white(0.25))
+    /// Fill of round icon buttons and secondary pills.
+    static let control = Color.adaptive(light: .black(0.06), dark: .white(0.08))
+    static let controlHover = Color.adaptive(light: .black(0.1), dark: .white(0.15))
+    static let border = Color.adaptive(light: .black(0.18), dark: .white(0.18))
+    static let sliderTrack = Color.adaptive(light: .black(0.13), dark: .white(0.16))
+    static let sliderFill = Color.adaptive(light: .black(0.55), dark: .white(0.85))
+    static let primaryText = Color.adaptive(light: .rgb(0.075, 0.075, 0.085), dark: .white(1))
+    static let secondaryText = Color.adaptive(light: .black(0.6), dark: .white(0.62))
+    static let tertiaryText = Color.adaptive(light: .black(0.42), dark: .white(0.38))
+    /// Slightly deeper in light mode so accent-colored text keeps its contrast on white.
+    static let accent = Color.adaptive(light: .rgb(0.1, 0.45, 0.95), dark: .rgb(0.24, 0.55, 1.0))
+    /// The app mark: a white record on dark chrome, a black one on light chrome.
+    static let vinylDisc = Color.adaptive(light: .rgb(0.12, 0.12, 0.13), dark: .white(0.96))
+    static let vinylGroove = Color.adaptive(light: .white(0.14), dark: .black(0.1))
+
+    /// Drop shadows: light surfaces need a much softer shadow than dark ones for the same depth.
+    static func shadow(_ opacity: Double) -> Color {
+        Color.adaptive(light: .black(opacity * 0.45), dark: .black(opacity))
+    }
 
     static let pagePadding: CGFloat = 36
     /// Left/right inset of sidebar and player bar content.
@@ -20,6 +39,7 @@ enum Theme {
     static let heroTitleSize: CGFloat = 42
     static let heroArtworkSize: CGFloat = 256
 
+    /// Stays dark in both appearances: it stands in for a cover, and its glyphs are white.
     static func placeholderGradient(seed: String) -> LinearGradient {
         let hue = Double(seed.stableHash % 360) / 360
         return LinearGradient(
@@ -36,6 +56,24 @@ enum Theme {
         let hue = Double(seed.stableHash % 360) / 360
         return Color(hue: hue, saturation: 0.55, brightness: 0.48)
     }
+}
+
+extension Color {
+    /// A color that resolves against the effective appearance of the view drawing it.
+    static func adaptive(light: NSColor, dark: NSColor) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light
+        })
+    }
+}
+
+private extension NSColor {
+    static func rgb(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> NSColor {
+        NSColor(srgbRed: red, green: green, blue: blue, alpha: 1)
+    }
+
+    static func white(_ alpha: CGFloat) -> NSColor { NSColor(srgbRed: 1, green: 1, blue: 1, alpha: alpha) }
+    static func black(_ alpha: CGFloat) -> NSColor { NSColor(srgbRed: 0, green: 0, blue: 0, alpha: alpha) }
 }
 
 /// Font pairings the app can be set in (Settings → Appearance). `display` is used for page and
