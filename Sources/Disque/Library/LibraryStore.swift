@@ -25,6 +25,7 @@ final class LibraryStore {
     @ObservationIgnored private var rescanPending = false
     @ObservationIgnored private var watcher: FolderWatcher?
     @ObservationIgnored private var saveStateTask: Task<Void, Never>?
+    @ObservationIgnored private var mountObserver: NSObjectProtocol?
 
     private static let foldersKey = "libraryFolders"
 
@@ -50,6 +51,17 @@ final class LibraryStore {
         await rebuildIndex(with: relevant)
         hasLoaded = true
         restartWatcher()
+        // Folders on external drives come back when the drive is connected again.
+        mountObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didMountNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.restartWatcher()
+                self?.rescan()
+            }
+        }
         rescan()
     }
 

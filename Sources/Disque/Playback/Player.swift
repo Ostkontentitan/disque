@@ -63,6 +63,10 @@ final class Player {
     @ObservationIgnored private var artworkImage: NSImage?
     @ObservationIgnored private var pendingSeek: Double?
     @ObservationIgnored private var isRestoring = false
+    /// Track to add to the history once its item has actually loaded (missing files never count as played).
+    @ObservationIgnored private var pendingPlayRecord: Track?
+    /// Items that failed in a row; once every queue entry has failed, playback stops instead of looping.
+    @ObservationIgnored private var consecutiveFailures = 0
 
     private enum Keys {
         static let volume = "player.volume"
@@ -76,6 +80,8 @@ final class Player {
         var time: Double
         var shuffle: Bool
         var source: String?
+        /// Queue order before shuffling, so turning shuffle off still works after a relaunch.
+        var unshuffledPaths: [String]?
     }
 
     var currentEntry: QueueEntry? {
@@ -124,6 +130,7 @@ final class Player {
         guard !tracks.isEmpty else { return }
         let entries = tracks.map(QueueEntry.init)
         let start = min(max(index, 0), entries.count - 1)
+        consecutiveFailures = 0
         sourceName = source
         if let shuffle { shuffleEnabled = shuffle }
 
@@ -247,6 +254,7 @@ final class Player {
 
     func jump(to entryID: UUID) {
         guard let index = queue.firstIndex(where: { $0.id == entryID }) else { return }
+        consecutiveFailures = 0
         startPlayback(at: index)
     }
 
@@ -397,8 +405,8 @@ final class Player {
         duration = track.duration
         if !isRestoring {
             currentTime = 0
-            library?.recordPlay(track)
         }
+        pendingPlayRecord = isRestoring ? nil : track
         observeStatus(of: item)
         enqueueNext()
         loadArtwork(for: track)
@@ -412,6 +420,11 @@ final class Player {
                 guard let self, item === self.activeItem else { return }
                 switch item.status {
                 case .readyToPlay:
+                    self.consecutiveFailures = 0
+                    if let track = self.pendingPlayRecord {
+                        self.pendingPlayRecord = nil
+                        self.library?.recordPlay(track)
+                    }
                     let seconds = item.duration.seconds
                     if seconds.isFinite, seconds > 0 { self.duration = seconds }
                     if let seek = self.pendingSeek {
@@ -430,6 +443,14 @@ final class Player {
 
     private func handleFailedItem() {
         guard let currentIndex else { return }
+        pendingPlayRecord = nil
+        consecutiveFailures += 1
+        // With repeat on, `nextIndex` wraps around; stop once every entry has failed.
+        if consecutiveFailures >= queue.count {
+            consecutiveFailures = 0
+            finishQueue()
+            return
+        }
         if let next = nextIndex(after: currentIndex, automatic: false), next != currentIndex {
             startPlayback(at: next)
         } else {
@@ -554,7 +575,8 @@ final class Player {
             index: currentIndex,
             time: currentTime,
             shuffle: shuffleEnabled,
-            source: sourceName
+            source: sourceName,
+            unshuffledPaths: unshuffledQueue?.map(\.track.path)
         )
         if let data = try? JSONEncoder().encode(state) {
             UserDefaults.standard.set(data, forKey: Keys.state)
@@ -563,19 +585,45 @@ final class Player {
 
     /// Restores the last queue (paused, at the last position) once the library is loaded.
     func restoreState(from library: LibraryStore) {
+        restoreState(using: library.index)
+    }
+
+    func restoreState(using index: LibraryIndex) {
         guard queue.isEmpty,
               let data = UserDefaults.standard.data(forKey: Keys.state),
               let state = try? JSONDecoder().decode(SavedState.self, from: data) else { return }
-        let tracks = state.paths.compactMap { library.index.tracksByID[$0] }
-        guard !tracks.isEmpty else { return }
-        queue = tracks.map(QueueEntry.init)
+        // Files may have disappeared since the state was saved; keep their saved positions so the
+        // current track is found again instead of shifting to a neighbour.
+        let available: [(offset: Int, entry: QueueEntry)] = state.paths.enumerated().compactMap { offset, path in
+            index.tracksByID[path].map { (offset, QueueEntry($0)) }
+        }
+        guard !available.isEmpty else { return }
+        queue = available.map(\.entry)
         shuffleEnabled = state.shuffle
         sourceName = state.source
-        let index = min(max(state.index ?? 0, 0), queue.count - 1)
-        pendingSeek = state.time > 1 ? state.time : nil
+        unshuffledQueue = shuffleEnabled ? Self.restoreOrder(of: queue, paths: state.unshuffledPaths) : nil
+
+        let savedIndex = state.index ?? 0
+        let start = available.firstIndex { $0.offset >= savedIndex } ?? 0
+        // Only resume mid-track if the saved current track is still there.
+        let time = available[start].offset == savedIndex ? state.time : 0
+        pendingSeek = time > 1 ? time : nil
         isRestoring = true
-        startPlayback(at: index, autoplay: false)
+        startPlayback(at: start, autoplay: false)
         isRestoring = false
-        currentTime = state.time
+        currentTime = time
+    }
+
+    /// Rebuilds the pre-shuffle order from saved paths, reusing the restored queue entries.
+    private static func restoreOrder(of entries: [QueueEntry], paths: [String]?) -> [QueueEntry] {
+        guard let paths else { return entries }
+        var remaining = entries
+        var ordered: [QueueEntry] = []
+        for path in paths {
+            if let i = remaining.firstIndex(where: { $0.track.path == path }) {
+                ordered.append(remaining.remove(at: i))
+            }
+        }
+        return ordered + remaining
     }
 }

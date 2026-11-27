@@ -51,15 +51,14 @@ struct LibraryIndex: Sendable {
             let sorted = members.sorted(by: trackOrder)
             let first = sorted[0]
             let albumArtistTag = sorted.lazy.compactMap { $0.albumArtist.nonEmpty }.first
-            let distinctArtists = Set(sorted.map { Artist.makeID($0.artist) })
             let flaggedCompilation = sorted.contains(where: \.isCompilation)
             let artist: String
             if let albumArtistTag {
                 artist = albumArtistTag
-            } else if distinctArtists.count > 1 || flaggedCompilation {
+            } else if flaggedCompilation {
                 artist = "Various Artists"
             } else {
-                artist = first.artist
+                artist = primaryArtist(of: sorted) ?? "Various Artists"
             }
             let isCompilation = Artist.makeID(artist) == "various artists" || Artist.makeID(artist) == "various"
             let artworkTrack = sorted.first(where: \.hasEmbeddedArtwork)
@@ -165,6 +164,38 @@ struct LibraryIndex: Sendable {
         index.genresByID = Dictionary(genres.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         index.totalDuration = orderedTracks.reduce(0) { $0 + $1.duration }
         return index
+    }
+
+    private static let featuringPattern = try! NSRegularExpression(
+        pattern: #"\s+[\(\[]?\s*(feat\.?|ft\.?|featuring)\s.*$"#,
+        options: [.caseInsensitive]
+    )
+
+    /// "Band feat. Guest" → "Band".
+    static func mainArtist(_ name: String) -> String {
+        let range = NSRange(name.startIndex..., in: name)
+        guard let match = featuringPattern.firstMatch(in: name, range: range),
+              let matchRange = Range(match.range, in: name) else { return name }
+        let base = String(name[..<matchRange.lowerBound]).trimmed
+        return base.isEmpty ? name : base
+    }
+
+    /// The artist an album without an album-artist tag belongs to: the main artist (ignoring
+    /// "feat." guests) of more than half of its tracks. `nil` means it is a various-artists album.
+    static func primaryArtist(of tracks: [Track]) -> String? {
+        guard !tracks.isEmpty else { return nil }
+        var counts: [String: Int] = [:]
+        var names: [String: String] = [:]
+        for track in tracks {
+            let main = mainArtist(track.artist)
+            let id = Artist.makeID(main)
+            counts[id, default: 0] += 1
+            if names[id] == nil { names[id] = main }
+            // Prefer the spelling of a track credited to the artist alone.
+            if Artist.makeID(track.artist) == id { names[id] = track.artist }
+        }
+        guard let (id, count) = counts.max(by: { $0.value < $1.value }), count * 2 > tracks.count else { return nil }
+        return names[id]
     }
 
     /// Tracks sharing an album title belong together when they share an album artist,

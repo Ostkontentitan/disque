@@ -41,6 +41,11 @@ enum LibraryScanner {
         return files
     }
 
+    static func isReachableDirectory(_ path: String) -> Bool {
+        var isDirectory: ObjCBool = false
+        return FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) && isDirectory.boolValue
+    }
+
     static func scanFile(at url: URL) -> ScanFile? {
         guard let values = try? url.resourceValues(forKeys: Set(resourceKeys)), values.isRegularFile == true else { return nil }
         return ScanFile(
@@ -59,8 +64,14 @@ enum LibraryScanner {
         cached: [String: Track],
         progress: @escaping @Sendable (Int, Int, [Track]?) -> Void
     ) async -> [Track] {
-        let files = enumerate(folders: folders)
-        var unchanged: [Track] = []
+        // A folder that is missing right now (e.g. on an external drive that isn't connected) keeps
+        // its cached tracks instead of emptying out the library until the next scan.
+        let available = folders.filter(isReachableDirectory)
+        let missing = folders.filter { !available.contains($0) }
+        let files = enumerate(folders: available)
+        var unchanged: [Track] = cached.values.filter { track in
+            missing.contains { LibraryStore.path(track.path, isInside: $0) }
+        }
         var toParse: [ScanFile] = []
         for file in files {
             if let track = cached[file.path],
