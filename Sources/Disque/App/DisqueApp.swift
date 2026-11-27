@@ -36,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     weak var player: Player?
     weak var library: LibraryStore?
     private var keyMonitor: Any?
+    private var clickMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -49,6 +50,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard event.window?.isKeyWindow == true, event.window?.attachedSheet == nil else { return event }
             MainActor.assumeIsolated { self?.player?.togglePlayPause() }
             return nil
+        }
+
+        // SwiftUI text fields keep keyboard focus when the user clicks elsewhere, so after using search
+        // every Space would go into the search field. Clicking outside the field being edited ends editing.
+        clickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) { event in
+            guard let window = event.window,
+                  let editor = window.firstResponder as? NSTextView, editor.isFieldEditor,
+                  let field = editor.delegate as? NSView
+            else { return event }
+            if !field.bounds.contains(field.convert(event.locationInWindow, from: nil)) {
+                window.makeFirstResponder(nil)
+            }
+            return event
         }
     }
 
