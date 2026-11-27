@@ -21,7 +21,7 @@ struct LibraryIndex: Sendable {
 
     func artwork(for track: Track) -> ArtworkRequest {
         album(for: track)?.artwork ?? ArtworkRequest(
-            key: "track:" + track.id,
+            key: "track:" + track.id + "|" + Self.artworkVersion(track.hasEmbeddedArtwork ? track : nil),
             embeddedPath: track.hasEmbeddedArtwork ? track.path : nil,
             directory: track.directory,
             seed: track.album
@@ -31,6 +31,13 @@ struct LibraryIndex: Sendable {
     /// Returns the artist page for a track artist name, if one exists.
     func artist(named name: String) -> Artist? {
         artistsByID[Artist.makeID(name)]
+    }
+
+    /// Part of the artwork cache key that changes when the embedded cover changes,
+    /// so a rescan never shows a stale (or stale "missing") cover.
+    static func artworkVersion(_ track: Track?) -> String {
+        guard let track else { return "none" }
+        return "\(track.path)#\(track.fileSize)#\(Int(track.modificationDate.timeIntervalSince1970))"
     }
 
     // MARK: - Building
@@ -77,7 +84,7 @@ struct LibraryIndex: Sendable {
                 discCount: Set(sorted.map { $0.discNumber ?? 1 }).count,
                 isCompilation: isCompilation,
                 artwork: ArtworkRequest(
-                    key: key,
+                    key: key + "|" + artworkVersion(artworkTrack),
                     embeddedPath: artworkTrack?.path,
                     directory: first.directory,
                     seed: first.album + artist
