@@ -267,7 +267,10 @@ struct TabStrip<Tab: Hashable & Identifiable>: View {
     @Namespace private var namespace
 
     var body: some View {
-        HStack(spacing: 30) {
+        // The gap between labels belongs to the tabs' hit areas (half to each side), so a click
+        // just beside a label still selects it. The negative padding keeps the labels where they
+        // would be with plain spacing.
+        HStack(spacing: 0) {
             ForEach(tabs) { tab in
                 TabStripItem(
                     title: title(tab),
@@ -278,12 +281,17 @@ struct TabStrip<Tab: Hashable & Identifiable>: View {
                 }
             }
         }
+        .padding(.horizontal, -TabStripItem.gap / 2)
+        .padding(.top, -TabStripItem.extraTopHitArea)
         // Animate only the underline; the tab content swaps instantly instead of cross-fading two pages.
         .animation(.snappy(duration: 0.25), value: selection)
     }
 }
 
 private struct TabStripItem: View {
+    static let gap: CGFloat = 30
+    static let extraTopHitArea: CGFloat = 8
+
     let title: String
     let isSelected: Bool
     let namespace: Namespace.ID
@@ -306,6 +314,8 @@ private struct TabStripItem: View {
                 .frame(height: 2.5)
             }
             .fixedSize()
+            .padding(.horizontal, Self.gap / 2)
+            .padding(.top, Self.extraTopHitArea)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
