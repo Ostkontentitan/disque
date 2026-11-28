@@ -11,6 +11,11 @@ let package = Package(
         .executableTarget(
             name: "Disque",
             path: "Sources/Disque"
+        ),
+        .testTarget(
+            name: "DisqueTests",
+            dependencies: ["Disque"],
+            path: "Tests/DisqueTests"
         )
     ],
     swiftLanguageModes: [.v5]

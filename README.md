@@ -59,6 +59,7 @@ The script puts a ready-to-run `Disque.app` in the `build` folder.
 
 - `swift build` makes a debug build. `.build/debug/Disque --dump-metadata <folder>` prints what Disque reads from your files.
 - With only the Command Line Tools installed, the macOS 27 SDK can't build the SwiftUI parts. `scripts/build-app.sh` switches to the newest macOS 26 SDK by itself. For a manual build, set it yourself: `SDKROOT=$(xcode-select -p)/SDKs/MacOSX26.5.sdk swift build`.
+- `swift test` runs the tests in `Tests/DisqueTests`. With only the Command Line Tools, also set the SDK as above and point the compiler at the testing macros: `swift test -Xswiftc -plugin-path -Xswiftc $(xcode-select -p)/usr/lib/swift/host/plugins/testing`.
 - The app icon comes from `swift scripts/make-icon.swift`.
 
 </details>
