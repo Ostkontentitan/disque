@@ -1,6 +1,6 @@
 # Disque
 
-A calm, album-first music player for macOS, made for the MP3s you already own. Point it at your music folders and it turns them into a library of covers, artists and genres you can browse. There's no streaming service, no account and nothing to import.
+A calm, album-first music player for macOS, made for your local music collection. Point it at your music folders and it turns them into a library of covers, artists and genres you can browse. There's no streaming service, no account and nothing to import.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/library-dark.webp">
